@@ -1,22 +1,21 @@
 #include "mainwindow.h"
+#include "toc.h"
 
+#include <QGuiApplication>
+#include <QScreen>
 #include <QIcon>
 #include <QMenuBar>
 #include <QToolBar>
 #include <QStatusBar>
-#include <QImage>
-#include <QPixmap>
-#include <QLabel>
 #include <QDebug>
-#include <QtPdf>
-#include <QTreeView>
-#include <QGraphicsView>
+
+using Poppler::OptContentModel;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     auto size = QGuiApplication::primaryScreen()->availableSize();
-    this->resize(size.width()*0.8, size.height()*0.8);
+    this->resize(size.width()*0.8, size.height() * 0.9);
     this->setWindowTitle(appName);
     this->setWindowIcon(QIcon(":/images/icon.png"));
 
@@ -26,34 +25,32 @@ MainWindow::MainWindow(QWidget *parent)
     menuBar()->addMenu(new QMenu("Tools"));
     menuBar()->addMenu(new QMenu("Help"));
 
-    pdfView = new PdfView("/home/vincent/Desktop/test.pdf");
+    pdfView = new PdfView("/home/vincent/Desktop/test3.pdf");
 
-    QSplitter* mainSplitter = new QSplitter(Qt::Vertical, this);
+    QSplitter* mainSplitter = new QSplitter(Qt::Horizontal, this);
     setCentralWidget(mainSplitter);
 
-    QSplitter* pdfArea = new QSplitter(Qt::Horizontal, mainSplitter);
-    mainSplitter->addWidget(pdfArea);
-
-    QPdfBookmarkModel* pdfBookmarkModel = new QPdfBookmarkModel(this);
-    pdfBookmarkModel->setDocument(pdfView->GetDocument());
-
-    QTreeView* bookmarkView = new QTreeView(this);
-    bookmarkView->setModel(pdfBookmarkModel);
-    bookmarkView->setHeaderHidden(true);
-    bookmarkView->expandAll();
-
-    connect(bookmarkView, &QTreeView::activated, this, &MainWindow::bookmarkSelected);
-
     QTabWidget* sideBar = new QTabWidget(this);
-    sideBar->addTab(bookmarkView, "Contents");
 
-    pdfArea->addWidget(sideBar);
-    pdfArea->addWidget(pdfView->GetLayout());
+    Toc* toc = new Toc(pdfView->GetDocument(), sideBar);
+    toc->expandAll();
+    connect(toc, &Toc::itemActivated, this, &MainWindow::ContentSelected);
+
+    sideBar->addTab(toc, "Contents");
+    mainSplitter->addWidget(sideBar);
+
+    QSplitter* pdfArea = new QSplitter(Qt::Vertical, mainSplitter);
+    pdfArea->addWidget(pdfView);
+
+    mainSplitter->addWidget(pdfArea);
+    mainSplitter->setStretchFactor(0, 3);
+    mainSplitter->setStretchFactor(1, 2);
 
     pageController = new PageController(this->size(), pdfView->GetPageCount());
-    mainSplitter->addWidget(pageController->GetLayout());
+    pdfArea->addWidget(pageController->GetLayout());
 
     connect(pageController, &PageController::pageChanged, pdfView, &PdfView::SetPageNum);
+    connect(pdfView, &PdfView::PageChanged, pageController, &PageController::SetPageNum);
 }
 
 MainWindow::~MainWindow()
@@ -62,9 +59,8 @@ MainWindow::~MainWindow()
     delete pageController;
 }
 
-void MainWindow::bookmarkSelected(const QModelIndex& index) {
-    if(!index.isValid()) {
-        return;
-    }
-    qDebug() << index.data(QPdfBookmarkModel::PageNumberRole).toInt();
+void MainWindow::ContentSelected(QTreeWidgetItem* item, int) {
+    if(item->columnCount() < 2) return;
+    int pageNum = item->text(1).toInt();
+    pageController->SetPageNum(pageNum);
 }

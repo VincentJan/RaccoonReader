@@ -3,16 +3,20 @@
 
 #include <QSlider>
 
-class PageSlider : public QSlider
-{
+class PageSlider : public QSlider {
+    Q_OBJECT
 public:
-    PageSlider();
+    PageSlider(QWidget* parent = nullptr);
+    ~PageSlider() = default;
     void mousePressEvent(QMouseEvent *e) override;
+    void mouseReleaseEvent(QMouseEvent *e) override;
     void wheelEvent(QWheelEvent *e) override;
     void keyPressEvent(QKeyEvent *e) override;
     void keyReleaseEvent(QKeyEvent *e) override;
 private:
-    int step_;
+    int step_ = 1;
+signals:
+    void SlideFinished();
 };
 
 #endif // PAGESLIDER_H

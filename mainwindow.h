@@ -10,11 +10,11 @@
 #include <QImage>
 #include <QPdfDocument>
 #include <QGraphicsView>
+#include <QTreeWidget>
 
 const QString appName = "Raccoon Reader";
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
@@ -24,7 +24,6 @@ private:
     PdfView* pdfView;
     PageController* pageController;
 
-    void bookmarkSelected(const QModelIndex& index);
-;
+    void ContentSelected(QTreeWidgetItem* item, int col);
 };
 #endif // MAINWINDOW_H

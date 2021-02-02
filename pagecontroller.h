@@ -3,10 +3,10 @@
 
 #include <QObject>
 #include <QSplitter>
-#include <QSpinBox>
 #include <QLabel>
 #include <QSize>
 #include "pageslider.h"
+#include "pagespinbox.h"
 
 class PageController : public QObject
 {
@@ -16,14 +16,16 @@ public:
     ~PageController();
     QWidget* GetLayout();
     void SetPageCount(int n);
+    void SetPageNum(int n);
 private:
     QSplitter* layout_;
     PageSlider* slider_;
-    QSpinBox* spinBox_;
+    PageSpinBox* spinBox_;
     QLabel* pageCountLabel_;
     int pageCount_;
+    int lastPage_;
 
-    void EmitChange(int n);
+    void EmitChange();
 signals:
     void pageChanged(int n);
 };

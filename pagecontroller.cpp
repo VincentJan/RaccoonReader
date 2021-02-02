@@ -1,28 +1,25 @@
 #include "pagecontroller.h"
 #include <QDebug>
 
-PageController::PageController(const QSize& size, const int pageCount) : pageCount_(pageCount) {
+PageController::PageController(const QSize& size, const int pageCount) : pageCount_(pageCount)
+  , lastPage_(0) {
     layout_ = new QSplitter(Qt::Horizontal);
     layout_->setFixedHeight(size.height() * 0.03);
-    layout_->setFixedWidth(size.width());
 
-    slider_ = new PageSlider();
+    slider_ = new PageSlider(layout_);
     slider_->setFixedHeight(size.height() * 0.03);
     layout_->addWidget(slider_);
 
-    spinBox_ = new QSpinBox();
-    spinBox_->setAlignment(Qt::AlignCenter);
+    spinBox_ = new PageSpinBox(layout_);
     spinBox_->setFixedHeight(size.height() * 0.03);
     spinBox_->setFixedWidth(size.width() * 0.05);
-    spinBox_->setValue(1);
     layout_->addWidget(spinBox_);
 
     connect(slider_, &PageSlider::valueChanged, spinBox_, &QSpinBox::setValue);
-    void (QSpinBox::*intValueChange)(int) = &QSpinBox::valueChanged;
-    connect(spinBox_, intValueChange, slider_, &QSlider::setValue);
-    connect(spinBox_, intValueChange, this, &PageController::EmitChange);
+    connect(slider_, &PageSlider::SlideFinished, this, &PageController::EmitChange);
+    connect(spinBox_, &QSpinBox::editingFinished, this, &PageController::EmitChange);
 
-    pageCountLabel_ = new QLabel();
+    pageCountLabel_ = new QLabel(layout_);
     pageCountLabel_->setFixedWidth(size.width() * 0.05);
     pageCountLabel_->setFixedHeight(size.height() * 0.03);
     pageCountLabel_->setAlignment(Qt::AlignHCenter);
@@ -33,9 +30,6 @@ PageController::PageController(const QSize& size, const int pageCount) : pageCou
 
 PageController::~PageController() {
     delete layout_;
-    delete slider_;
-    delete spinBox_;
-    delete pageCountLabel_;
 }
 
 QWidget* PageController::GetLayout() {
@@ -50,6 +44,17 @@ void PageController::SetPageCount(int n) {
     pageCountLabel_->setText("/ " + QString::number(pageCount_));
 }
 
-void PageController::EmitChange(int n) {
+void PageController::EmitChange() {
+    int n = spinBox_->value();
+    if(n == lastPage_) {
+        return;
+    }
+    lastPage_ = n;
+    slider_->setValue(n);
     emit pageChanged(n);
+}
+
+void PageController::SetPageNum(int n) {
+    spinBox_->setValue(n);
+    emit spinBox_->editingFinished();
 }

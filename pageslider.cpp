@@ -1,11 +1,12 @@
 #include "pageslider.h"
 #include <QMouseEvent>
 
-PageSlider::PageSlider() : step_(1) {
+PageSlider::PageSlider(QWidget* parent) : step_(1) {
     this->setOrientation(Qt::Horizontal);
     this->setMinimum(1);
     this->setSingleStep(1);
     this->setPageStep(1);
+    this->setParent(parent);
 }
 
 void PageSlider::mousePressEvent(QMouseEvent *e) {
@@ -15,12 +16,18 @@ void PageSlider::mousePressEvent(QMouseEvent *e) {
     setValue(val);
 }
 
+void PageSlider::mouseReleaseEvent(QMouseEvent *e) {
+    QSlider::mouseReleaseEvent(e);
+    emit SlideFinished();
+}
+
 void PageSlider::wheelEvent(QWheelEvent *e) {
     if (e->angleDelta().y() > 0) {
         this->setValue(this->value() - step_);
     } else {
         this->setValue(this->value() + step_);
     }
+    emit SlideFinished();
 }
 
 void PageSlider::keyPressEvent(QKeyEvent *e) {

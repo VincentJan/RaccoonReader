@@ -1,39 +1,50 @@
 #include "pagecontroller.h"
 #include <QDebug>
+#include <QMap>
 
 PageController::PageController(const QSize& size, const int pageCount) : pageCount_(pageCount)
   , lastPage_(0) {
-    layout_ = new QSplitter(Qt::Horizontal);
-    layout_->setFixedHeight(size.height() * 0.03);
+    widget_ = new QSplitter(Qt::Horizontal);
+    widget_->setFixedHeight(size.height() * 0.03);
 
-    slider_ = new PageSlider(layout_);
+    comboBox_ = new QComboBox(widget_);
+    QStringList items;
+    items << "Fit Width" << "Fit Height" << "Fit Page" << "25%" << "50%"
+        << "75%" << "100%" << "125%" << "150%" << "175%" << "200%" << "300%" << "400%" << "800%";
+    comboBox_->addItems(items);
+    comboBox_->setCurrentIndex(6);
+    comboBox_->setFixedHeight(size.height() * 0.03);
+    comboBox_->setFixedWidth(size.width() * 0.1);
+    connect(comboBox_, &QComboBox::textActivated, this, &PageController::EmitScale);
+
+    slider_ = new PageSlider(widget_);
     slider_->setFixedHeight(size.height() * 0.03);
-    layout_->addWidget(slider_);
+    widget_->addWidget(slider_);
 
-    spinBox_ = new PageSpinBox(layout_);
+    spinBox_ = new PageSpinBox(widget_);
     spinBox_->setFixedHeight(size.height() * 0.03);
     spinBox_->setFixedWidth(size.width() * 0.05);
-    layout_->addWidget(spinBox_);
+    widget_->addWidget(spinBox_);
 
     connect(slider_, &PageSlider::valueChanged, spinBox_, &QSpinBox::setValue);
     connect(slider_, &PageSlider::SlideFinished, this, &PageController::EmitChange);
     connect(spinBox_, &QSpinBox::editingFinished, this, &PageController::EmitChange);
 
-    pageCountLabel_ = new QLabel(layout_);
+    pageCountLabel_ = new QLabel(widget_);
     pageCountLabel_->setFixedWidth(size.width() * 0.05);
     pageCountLabel_->setFixedHeight(size.height() * 0.03);
     pageCountLabel_->setAlignment(Qt::AlignHCenter);
-    layout_->addWidget(pageCountLabel_);
+    widget_->addWidget(pageCountLabel_);
 
     SetPageCount(pageCount);
 }
 
 PageController::~PageController() {
-    delete layout_;
+    delete widget_;
 }
 
-QWidget* PageController::GetLayout() {
-    return layout_;
+QWidget* PageController::GetWidget() {
+    return widget_;
 }
 
 void PageController::SetPageCount(int n) {
@@ -42,6 +53,11 @@ void PageController::SetPageCount(int n) {
     slider_->setMaximum(pageCount_);
     spinBox_->setRange(1, pageCount_);
     pageCountLabel_->setText("/ " + QString::number(pageCount_));
+}
+
+void PageController::SetPageNum(int n) {
+    spinBox_->setValue(n);
+    emit spinBox_->editingFinished();
 }
 
 void PageController::EmitChange() {
@@ -54,7 +70,6 @@ void PageController::EmitChange() {
     emit pageChanged(n);
 }
 
-void PageController::SetPageNum(int n) {
-    spinBox_->setValue(n);
-    emit spinBox_->editingFinished();
+void PageController::EmitScale(const QString& scale) {
+    emit scaleChanged(scale);
 }

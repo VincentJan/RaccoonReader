@@ -29,15 +29,3 @@ void PageSlider::wheelEvent(QWheelEvent *e) {
     }
     emit SlideFinished();
 }
-
-void PageSlider::keyPressEvent(QKeyEvent *e) {
-    if(e->key() == Qt::Key_Shift) {
-        step_ = 10;
-    }
-}
-
-void PageSlider::keyReleaseEvent(QKeyEvent *e) {
-    if(e->key() == Qt::Key_Shift) {
-        step_ = 1;
-    }
-}

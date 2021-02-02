@@ -3,6 +3,7 @@
 
 #include "pdfview.h"
 #include "pagecontroller.h"
+#include "toc.h"
 
 #include <QMainWindow>
 #include <QString>
@@ -20,10 +21,15 @@ class MainWindow : public QMainWindow {
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void OpenFile();
+    void CloseFile();
 private:
-    PdfView* pdfView;
-    PageController* pageController;
-
+    PdfView* pdfView_;
+    PageController* pageController_;
+    QSplitter* mainSplitter_;
+    QTabWidget* sideBar_;
+    Toc* toc_;
+    QSplitter* pdfArea_;
     void ContentSelected(QTreeWidgetItem* item, int col);
 };
 #endif // MAINWINDOW_H

@@ -18,6 +18,7 @@ public:
     Toc& operator=(Toc&&) = delete;
     ~Toc() = default;
     void SetDocument(Document* doc);
+    void HighLightItem(int n);
 private:
     void GenerateSubItem(QTreeWidgetItem* parent, const QVector<OutlineItem>& outlines);
     QVector<OutlineItem> outlineItem_;

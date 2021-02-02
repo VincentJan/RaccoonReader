@@ -5,6 +5,7 @@
 #include <QSplitter>
 #include <QLabel>
 #include <QSize>
+#include <QComboBox>
 #include "pageslider.h"
 #include "pagespinbox.h"
 
@@ -14,11 +15,12 @@ class PageController : public QObject
 public:
     PageController(const QSize& size, int pageCount);
     ~PageController();
-    QWidget* GetLayout();
+    QWidget* GetWidget();
     void SetPageCount(int n);
     void SetPageNum(int n);
 private:
-    QSplitter* layout_;
+    QSplitter* widget_;
+    QComboBox* comboBox_;
     PageSlider* slider_;
     PageSpinBox* spinBox_;
     QLabel* pageCountLabel_;
@@ -26,8 +28,10 @@ private:
     int lastPage_;
 
     void EmitChange();
+    void EmitScale(const QString& scale);
 signals:
-    void pageChanged(int n);
+    void pageChanged(int pageNum);
+    void scaleChanged(const QString& scale);
 };
 
 #endif // PAGECONTROLLER_H

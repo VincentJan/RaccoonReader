@@ -16,12 +16,12 @@ Toc::Toc(Document* doc, QWidget* parent) {
     QStringList headers;
     headers << "Name" << "Page";
     this->setHeaderLabels(headers);
-    this->setColumnWidth(0, 300);
-    this->setColumnWidth(1, 50);
-//    this->setHeaderHidden(true);
+    this->setHeaderHidden(true);
+    this->setColumnHidden(1, true);
 }
 
 void Toc::SetDocument(Document* doc) {
+    this->clear();
     if (doc == nullptr) return;
     outlineItem_ = doc->outline();
     for (int i = 0; i < outlineItem_.size(); ++i) {
@@ -37,6 +37,18 @@ void Toc::SetDocument(Document* doc) {
             GenerateSubItem(tmp, curItem.children());
         }
     }
+}
+
+void Toc::HighLightItem(int n) {
+    QTreeWidgetItemIterator it(this);
+    while (*it) {
+        if((*it)->text(1).toInt() > n) {
+            --it;
+            break;
+        }
+        ++it;
+    }
+    this->setCurrentItem(*it);
 }
 
 void Toc::GenerateSubItem(QTreeWidgetItem* parent, const QVector<OutlineItem>& outlines) {

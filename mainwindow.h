@@ -1,3 +1,11 @@
+/*
+**  This file is part of Raccoon Reader.
+**
+** 	mainwindow.h: Declaration of MainWindow class.
+**
+**  Copyright 2021 Yang XiLong
+*/
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -6,30 +14,38 @@
 #include "toc.h"
 
 #include <QMainWindow>
-#include <QString>
 #include <QSplitter>
-#include <QImage>
-#include <QPdfDocument>
-#include <QGraphicsView>
-#include <QTreeWidget>
+#include <QString>
+#include <QIcon>
 
-const QString appName = "Raccoon Reader";
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow
+{
     Q_OBJECT
-
 public:
     MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
-    void OpenFile();
-    void CloseFile();
+    ~MainWindow() = default;
+    MainWindow(const MainWindow&) = delete;
+    MainWindow(MainWindow&&) = delete;
+    void openFile();
+    void closeFile();
+    void actualSize();
+    void fitWidth();
+    void fitHeight();
+    void fitPage();
 private:
-    PdfView* pdfView_;
-    PageController* pageController_;
-    QSplitter* mainSplitter_;
-    QTabWidget* sideBar_;
-    Toc* toc_;
-    QSplitter* pdfArea_;
-    void ContentSelected(QTreeWidgetItem* item, int col);
+    QSplitter *mainSplitter_;
+    QTabWidget *sideBar_;
+    Toc *toc_;
+    PdfView *pdfView_;
+    PageController *pageController_;
+    QSplitter *pdfArea_;
+
+    void generateMenuBar();
+    void contentSelected(QTreeWidgetItem *item, int col);
+    static const QString appName;
+    static const QString appLogo;
+signals:
+    void documentChanged(Document *file);
 };
 #endif // MAINWINDOW_H

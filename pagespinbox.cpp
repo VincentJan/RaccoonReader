@@ -1,9 +1,9 @@
 #include "pagespinbox.h"
 
 PageSpinBox::PageSpinBox(QWidget* parent) {
-    this->setParent(parent);
-    this->setAlignment(Qt::AlignCenter);
-    this->setValue(1);
+    setParent(parent);
+    setAlignment(Qt::AlignCenter);
+    setValue(1);
 }
 
 void PageSpinBox::mouseReleaseEvent(QMouseEvent* e) {

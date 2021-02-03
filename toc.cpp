@@ -4,24 +4,24 @@
 #include <QHeaderView>
 
 namespace  {
-    QString ExtractPageNum(const QString& str) {
+    QString extractPageNum(const QString& str) {
         auto list = str.split(";");
         return list.at(1);
     }
 }
 
 Toc::Toc(Document* doc, QWidget* parent) {
-    this->setParent(parent);
-    SetDocument(doc);
+    setParent(parent);
+    setDocument(doc);
     QStringList headers;
     headers << "Name" << "Page";
-    this->setHeaderLabels(headers);
-    this->setHeaderHidden(true);
-    this->setColumnHidden(1, true);
+    setHeaderLabels(headers);
+    setHeaderHidden(true);
+    setColumnHidden(1, true);
 }
 
-void Toc::SetDocument(Document* doc) {
-    this->clear();
+void Toc::setDocument(Document* doc) {
+    clear();
     if (doc == nullptr) return;
     outlineItem_ = doc->outline();
     for (int i = 0; i < outlineItem_.size(); ++i) {
@@ -30,16 +30,17 @@ void Toc::SetDocument(Document* doc) {
         tmp->setText(0, curItem.name());
         auto pageData = curItem.destination().data();
         if(pageData != nullptr) {
-            auto pageNum = ExtractPageNum(pageData->toString());
+            auto pageNum = extractPageNum(pageData->toString());
             tmp->setText(1, pageNum);
         }
         if (curItem.hasChildren()) {
-            GenerateSubItem(tmp, curItem.children());
+            generateSubItem(tmp, curItem.children());
         }
     }
+    expandAll();
 }
 
-void Toc::HighLightItem(int n) {
+void Toc::highlightItem(int n) {
     QTreeWidgetItemIterator it(this);
     while (*it) {
         if((*it)->text(1).toInt() > n) {
@@ -48,21 +49,21 @@ void Toc::HighLightItem(int n) {
         }
         ++it;
     }
-    this->setCurrentItem(*it);
+    setCurrentItem(*it);
 }
 
-void Toc::GenerateSubItem(QTreeWidgetItem* parent, const QVector<OutlineItem>& outlines) {
+void Toc::generateSubItem(QTreeWidgetItem* parent, const QVector<OutlineItem>& outlines) {
     for(int i = 0; i < outlines.size(); ++i) {
         auto curItem = outlines.at(i);
         auto tmp = new QTreeWidgetItem(parent);
         tmp->setText(0, curItem.name());
         auto pageData = curItem.destination().data();
         if(pageData != nullptr) {
-            auto pageNum = ExtractPageNum(pageData->toString());
+            auto pageNum = extractPageNum(pageData->toString());
             tmp->setText(1, pageNum);
         }
         if(curItem.hasChildren()) {
-            GenerateSubItem(tmp, curItem.children());
+            generateSubItem(tmp, curItem.children());
         }
     }
 }

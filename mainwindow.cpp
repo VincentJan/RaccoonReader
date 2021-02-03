@@ -9,35 +9,21 @@
 #include <QFileDialog>
 #include <QDebug>
 
-using Poppler::OptContentModel;
+const QString MainWindow::appName(tr("Raccoon Reader"));
+const QString MainWindow::appLogo(tr(":/images/icon.png"));
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     auto size = QGuiApplication::primaryScreen()->availableSize();
-    this->resize(size.width()*0.8, size.height() * 0.9);
-    this->setWindowTitle(appName);
-    this->setWindowIcon(QIcon(":/images/icon.png"));
+    resize(size.width()*0.8, size.height() * 0.9);
+    setWindowTitle(appName);
+    setWindowIcon(QIcon(appLogo));
 
-    auto fileMenu = new QMenu("File", menuBar());
-    menuBar()->addMenu(fileMenu);
+    generateMenuBar();
 
-    auto openFile = new QAction("Open File", fileMenu);
-    openFile->setShortcut(QKeySequence::Open);
-    connect(openFile, &QAction::triggered, this, &MainWindow::OpenFile);
-    fileMenu->addAction(openFile);
-
-    auto closeFile = new QAction("Close File", fileMenu);
-    closeFile->setShortcut(QKeySequence::Close);
-    connect(closeFile, &QAction::triggered, this, &MainWindow::CloseFile);
-    fileMenu->addAction(closeFile);
-
-    menuBar()->addMenu(new QMenu("Edit"));
-    menuBar()->addMenu(new QMenu("View"));
-    menuBar()->addMenu(new QMenu("Tools"));
-    menuBar()->addMenu(new QMenu("Help"));
-
-    pdfView_ = new PdfView();
+    pdfView_ = new PdfView(this);
+    connect(this, &MainWindow::documentChanged, pdfView_, &PdfView::setDocument);
 
     mainSplitter_ = new QSplitter(Qt::Horizontal, this);
     setCentralWidget(mainSplitter_);
@@ -46,69 +32,110 @@ MainWindow::MainWindow(QWidget *parent)
     mainSplitter_->addWidget(sideBar_);
     sideBar_->setVisible(false);
 
+    toc_ = new Toc(nullptr, sideBar_);
+    toc_->expandAll();
+    connect(this, &MainWindow::documentChanged, toc_, &Toc::setDocument);
+    connect(toc_, &Toc::itemActivated, this, &MainWindow::contentSelected);
+    connect(pdfView_, &PdfView::pageChanged, toc_, &Toc::highlightItem);
+    sideBar_->addTab(toc_, tr("Contents"));
+
     pdfArea_ = new QSplitter(Qt::Vertical, mainSplitter_);
     pdfArea_->addWidget(pdfView_);
 
-    pageController_ = new PageController(this->size(), 1);
-    pdfArea_->addWidget(pageController_->GetWidget());
-
-    connect(pageController_, &PageController::pageChanged, pdfView_, &PdfView::SetPageNum);
-    connect(pdfView_, &PdfView::PageChanged, pageController_, &PageController::SetPageNum);
-    connect(pageController_, &PageController::scaleChanged, pdfView_, &PdfView::SetScale);
+    pageController_ = new PageController(this->size());
+    connect(this, &MainWindow::documentChanged, pageController_, &PageController::setFromDocument);
+    connect(pageController_, &PageController::pageChanged, pdfView_, &PdfView::setPageNum);
+    connect(pdfView_, &PdfView::pageChanged, pageController_, &PageController::setPageNum);
+    connect(pageController_, &PageController::scaleChanged, pdfView_, &PdfView::setScale);
+    connect(pdfView_, &PdfView::scaleChanged, pageController_, &PageController::setScale);
+    connect(pageController_, &PageController::scaleSelected, pdfView_, &PdfView::clearFitMode);
+    pdfArea_->addWidget(pageController_);
 
     mainSplitter_->addWidget(pdfArea_);
 }
 
-MainWindow::~MainWindow()
+void MainWindow::generateMenuBar()
 {
-    delete pdfView_;
-    delete pageController_;
+    auto fileMenu = new QMenu(tr("File"), menuBar());
+    menuBar()->addMenu(fileMenu);
+
+    auto openFile = new QAction(tr("Open File"), fileMenu);
+    openFile->setShortcut(QKeySequence::Open);
+    connect(openFile, &QAction::triggered, this, &MainWindow::openFile);
+    fileMenu->addAction(openFile);
+
+    auto closeFile = new QAction(tr("Close File"), fileMenu);
+    closeFile->setShortcut(QKeySequence::Close);
+    connect(closeFile, &QAction::triggered, this, &MainWindow::closeFile);
+    fileMenu->addAction(closeFile);
+
+    auto viewMenu = new QMenu(tr("View"), menuBar());
+    menuBar()->addMenu(viewMenu);
+
+    auto actualSize = new QAction(tr("Actual Size"), viewMenu);
+    connect(actualSize, &QAction::triggered, this, &MainWindow::actualSize);
+    viewMenu->addAction(actualSize);
+
+    auto fitWidth = new QAction(tr("Fit Width"), viewMenu);
+    connect(fitWidth, &QAction::triggered, this, &MainWindow::fitWidth);
+    viewMenu->addAction(fitWidth);
+
+    auto fitHeight = new QAction(tr("Fit Height"), viewMenu);
+    connect(fitHeight, &QAction::triggered, this, &MainWindow::fitHeight);
+    viewMenu->addAction(fitHeight);
+
+    auto fitPage = new QAction(tr("Fit Page"), viewMenu);
+    connect(fitPage, &QAction::triggered, this, &MainWindow::fitPage);
+    viewMenu->addAction(fitPage);
+
+    menuBar()->addMenu(new QMenu("Edit"));
+    menuBar()->addMenu(new QMenu("Tools"));
+    menuBar()->addMenu(new QMenu("Help"));
 }
 
-void MainWindow::OpenFile() {
+void MainWindow::openFile()
+{
     auto fileName = QFileDialog::getOpenFileName(this,
          tr("Open Document"), "$HOME", tr("Pdf Files (*.pdf)"));
-
-    if(fileName == "") {
-        return;
-    }
-
-    CloseFile();
-
-    pdfView_->SetDocument(Document::load(fileName));
-    pdfView_->SetPageNum(1);
-
-    if (toc_ == nullptr) {
-        toc_ = new Toc(pdfView_->GetDocument(), sideBar_);
-        sideBar_->addTab(toc_, "Contents");
-
-        connect(toc_, &Toc::itemActivated, this, &MainWindow::ContentSelected);
-        connect(pdfView_, &PdfView::PageChanged, toc_, &Toc::HighLightItem);
-    } else {
-        toc_->SetDocument(pdfView_->GetDocument());
-    }
+    if(fileName == "") return;
+    closeFile();
+    emit documentChanged(Document::load(fileName));
     sideBar_->setVisible(true);
     mainSplitter_->setStretchFactor(0, 1);
     mainSplitter_->setStretchFactor(1, 3);
-    toc_->expandAll();
-
-    pageController_->SetPageCount(pdfView_->GetPageCount());
 }
 
-void MainWindow::CloseFile() {
-    pdfView_->SetDocument(nullptr);
-    pdfView_->SetPageNum(1);
-
-    if (toc_ != nullptr) {
-        toc_->SetDocument(nullptr);
-    }
+void MainWindow::closeFile()
+{
+    emit documentChanged(nullptr);
     sideBar_->setVisible(false);
-
-    pageController_->SetPageCount(0);
 }
 
-void MainWindow::ContentSelected(QTreeWidgetItem* item, int) {
+void MainWindow::actualSize()
+{
+    pdfView_->setFitMode(PdfView::None);
+    pdfView_->setScale(1);
+    pageController_->setScale(1);
+}
+
+void MainWindow::fitWidth()
+{
+    pdfView_->setFitMode(PdfView::FitWidth);
+}
+
+void MainWindow::fitHeight()
+{
+    pdfView_->setFitMode(PdfView::FitHeight);
+}
+
+void MainWindow::fitPage()
+{
+    pdfView_->setFitMode(PdfView::FitPage);
+}
+
+void MainWindow::contentSelected(QTreeWidgetItem* item, int)
+{
     if(item->columnCount() < 2) return;
     int pageNum = item->text(1).toInt();
-    pageController_->SetPageNum(pageNum);
+    pageController_->setPageNum(pageNum);
 }

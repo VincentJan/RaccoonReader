@@ -17,10 +17,10 @@ public:
     Toc& operator=(const Toc&) = delete;
     Toc& operator=(Toc&&) = delete;
     ~Toc() = default;
-    void SetDocument(Document* doc);
-    void HighLightItem(int n);
+    void setDocument(Document* doc);
+    void highlightItem(int n);
 private:
-    void GenerateSubItem(QTreeWidgetItem* parent, const QVector<OutlineItem>& outlines);
+    void generateSubItem(QTreeWidgetItem* parent, const QVector<OutlineItem>& outlines);
     QVector<OutlineItem> outlineItem_;
 };
 

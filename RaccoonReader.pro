@@ -1,4 +1,4 @@
-QT       += core gui pdf pdfwidgets xml
+QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -17,6 +17,7 @@ SOURCES += \
     pageslider.cpp \
     pagespinbox.cpp \
     pdfview.cpp \
+    scalebox.cpp \
     toc.cpp
 
 HEADERS += \
@@ -25,6 +26,7 @@ HEADERS += \
     pageslider.h \
     pagespinbox.h \
     pdfview.h \
+    scalebox.h \
     toc.h
 
 # Default rules for deployment.

@@ -7,17 +7,15 @@
 #include <QApplication>
 #include <QScreen>
 #include <QRect>
+#include <QGraphicsRectItem>
 #include <QApplication>
 
 PdfView::PdfView(QWidget *parent)
     : QGraphicsView(parent), fitMode_(), doc_(), curScene_(new QGraphicsScene)
 {
+    curSelect_ = new QGraphicsRectItem();
     setScene(curScene_);
-    setStyleSheet("background-color:gray");
-    verticalScrollBar()->setStyleSheet("background-color:lightgray");
-    horizontalScrollBar()->setStyleSheet("background-color:lightgray");
     setDragMode(QGraphicsView::ScrollHandDrag);
-    setMouseTracking(true);
 }
 
 PdfView::PdfView(const QString &path, QWidget *parent)
@@ -50,10 +48,12 @@ void PdfView::setPageNum(int n)
     emit pageChanged(n);
     double res = QApplication::primaryScreen()->logicalDotsPerInch() * scale_;
     auto page = doc_->page(pageNum_ - 1);
-    QImage pageImg = page->renderToImage(res, res);
+    QImage img = page->renderToImage(res, res);
     curScene_->clear();
-    curScene_->addPixmap(QPixmap::fromImage(pageImg));
-    curScene_->setSceneRect(0, 0, pageImg.width(), pageImg.height());
+    curScene_->addPixmap(QPixmap::fromImage(img));
+    curScene_->setSceneRect(0, 0, img.width(), img.height());
+    curSelect_ = new QGraphicsRectItem();
+    curScene_->addItem(curSelect_);
 }
 
 void PdfView::setDocument(Document* doc)
@@ -128,20 +128,70 @@ void PdfView::clearFitMode()
     setFitMode(None);
 }
 
+void PdfView::enterScaleMode()
+{
+    clearEditMode();
+    scaleMode_ = true;
+    QApplication::setOverrideCursor(Qt::SizeVerCursor);
+    setDragMode(QGraphicsView::NoDrag);
+}
+
+void PdfView::enterSelectMode() {
+    clearEditMode();
+    selectMode_ = true;
+    QApplication::setOverrideCursor(Qt::CrossCursor);
+    setDragMode(QGraphicsView::NoDrag);
+}
+
+void PdfView::clearEditMode() {
+    QApplication::restoreOverrideCursor();
+    setDragMode(QGraphicsView::ScrollHandDrag);
+    curSelect_->setRect(0, 0, 0, 0);
+    selectMode_ = false;
+    scaleMode_ = false;
+}
+
 void PdfView::mousePressEvent(QMouseEvent* e)
 {
+    if(selectMode_) {
+        startPos_ = e->pos();
+    }
     e->ignore();
     QGraphicsView::mousePressEvent(e);
 }
 
 void PdfView::mouseMoveEvent(QMouseEvent* e)
 {
+    if(selectMode_) {
+        endPos_ = e->pos();
+        auto sceneStartPos = mapToScene(startPos_);
+        auto sceneEndPos = mapToScene(endPos_);
+        auto spos = curSelect_->mapFromScene(sceneStartPos);
+        auto epos = curSelect_->mapFromScene(sceneEndPos);
+        curSelect_->setRect(QRectF(spos, epos));
+        auto brush = QBrush();
+        brush.setStyle(Qt::SolidPattern);
+        brush.setColor(QColor(150, 150, 200, 100));
+        curSelect_->setBrush(brush);
+    }
     e->ignore();
     QGraphicsView::mouseMoveEvent(e);
 }
 
 void PdfView::mouseReleaseEvent(QMouseEvent* e)
 {
+    if(selectMode_) {
+        endPos_ = e->pos();
+        auto sceneStartPos = mapToScene(startPos_);
+        auto sceneEndPos = mapToScene(endPos_);
+        auto spos = curSelect_->mapFromScene(sceneStartPos);
+        auto epos = curSelect_->mapFromScene(sceneEndPos);
+        curSelect_->setRect(QRectF(spos, epos));
+        auto selectArea = new QGraphicsRectItem();
+        selectArea->setRect(curSelect_->rect());
+        selectArea->setBrush(curSelect_->brush());
+        curScene_->addItem(selectArea);
+    }
     e->ignore();
     QGraphicsView::mouseReleaseEvent(e);
 }
@@ -149,7 +199,7 @@ void PdfView::mouseReleaseEvent(QMouseEvent* e)
 void PdfView::wheelEvent(QWheelEvent *e)
 {
     e->ignore();
-    if(ctrlPressed_) {
+    if(scaleMode_) {
         clearFitMode();
         if(e->angleDelta().y() >= 0) {
             if(scale_ < 10 - 0.15)
@@ -175,6 +225,7 @@ void PdfView::wheelEvent(QWheelEvent *e)
 
 void PdfView::keyPressEvent(QKeyEvent *e)
 {
+
     e->ignore();
     if (e->key() == Qt::Key_J || e->key() == Qt::Key_Down) {
         MoveDown(50);
@@ -188,32 +239,22 @@ void PdfView::keyPressEvent(QKeyEvent *e)
     if (e->key() == Qt::Key_L || e->key() == Qt::Key_Right) {
         MoveRight(50);
     }
-    if(e->key() == Qt::Key_Control) {
-        ctrlPressed_ = true;
-    }
-    if(e->key() == Qt::Key_Alt) {
-        altPressed_ = true;
-    }
     if(e->key() == Qt::Key_Shift) {
-        shiftPressed_ = true;
-        QApplication::setOverrideCursor(Qt::CrossCursor);
+        enterSelectMode();
     }
-
+    if(e->key() == Qt::Key_Control) {
+        enterScaleMode();
+    }
 }
 
 void PdfView::keyReleaseEvent(QKeyEvent *e)
 {
     e->ignore();
     QGraphicsView::keyReleaseEvent(e);
-    if(e->key() == Qt::Key_Control) {
-        ctrlPressed_ = false;
-    }
-    if(e->key() == Qt::Key_Alt) {
-        altPressed_ = false;
-    }
-    if(e->key() == Qt::Key_Shift) {
-        shiftPressed_ = false;
-        QApplication::restoreOverrideCursor();
+    if((selectMode_ && e->key() == Qt::Key_Shift)
+            ||(scaleMode_ && e->key() == Qt::Key_Control))
+    {
+        clearEditMode();
     }
 }
 
@@ -232,7 +273,7 @@ void PdfView::focusOutEvent(QFocusEvent *e)
 {
     e->ignore();
     QGraphicsView::focusOutEvent(e);
-    QApplication::restoreOverrideCursor();
+    clearEditMode();
 }
 
 void PdfView::MoveUp(int n)

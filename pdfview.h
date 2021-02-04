@@ -33,6 +33,10 @@ public:
     void setScale(double scale);
     void setFitMode(FitMode fitMode);
     void clearFitMode();
+    void enterSelectMode();
+    void enterScaleMode();
+    void clearEditMode();
+protected:
     void mousePressEvent(QMouseEvent *e) override;
     void mouseMoveEvent(QMouseEvent *e) override;
     void mouseReleaseEvent(QMouseEvent *e) override;
@@ -49,10 +53,13 @@ private:
     QPoint startPot_;
     Document* doc_;
     QGraphicsScene* curScene_;
+    QGraphicsRectItem *curSelect_;
 
-    bool ctrlPressed_ = false;
-    bool altPressed_ = false;
-    bool shiftPressed_ = false;
+    bool scaleMode_ = false;
+    bool selectMode_ = false;
+
+    QPoint startPos_;
+    QPoint endPos_;
 
     void MoveUp(int n);
     void MoveDown(int n);

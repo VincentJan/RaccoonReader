@@ -8,6 +8,7 @@
 #include <QStatusBar>
 #include <QFileDialog>
 #include <QDebug>
+#include <QKeyEvent>
 
 const QString MainWindow::appName(tr("Raccoon Reader"));
 const QString MainWindow::appLogo(tr(":/images/icon.png"));

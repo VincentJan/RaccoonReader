@@ -1,4 +1,13 @@
-#include "pdfview.h"
+/*
+**  This file is part of Raccoon Reader.
+**
+** 	mainwindow.h: Declaration of MainWindow class.
+**
+**  Copyright 2021 Yang XiLong
+*/
+
+#include "include/pdfarea/pdfview/pdfview.h"
+#include "include/pdfarea/pdfview/selectrect.h"
 
 #include <QDebug>
 #include <QWheelEvent>
@@ -9,6 +18,8 @@
 #include <QRect>
 #include <QGraphicsRectItem>
 #include <QApplication>
+#include <QDialog>
+#include <QLabel>
 
 PdfView::PdfView(QWidget *parent)
     : QGraphicsView(parent), fitMode_(), doc_(), curScene_(new QGraphicsScene)
@@ -130,6 +141,7 @@ void PdfView::clearFitMode()
 
 void PdfView::enterScaleMode()
 {
+    if (doc_ == nullptr) return;
     clearEditMode();
     scaleMode_ = true;
     QApplication::setOverrideCursor(Qt::SizeVerCursor);
@@ -137,10 +149,12 @@ void PdfView::enterScaleMode()
 }
 
 void PdfView::enterSelectMode() {
+    if (doc_ == nullptr) return;
     clearEditMode();
     selectMode_ = true;
     QApplication::setOverrideCursor(Qt::CrossCursor);
     setDragMode(QGraphicsView::NoDrag);
+    setMouseTracking(true);
 }
 
 void PdfView::clearEditMode() {
@@ -149,12 +163,15 @@ void PdfView::clearEditMode() {
     curSelect_->setRect(0, 0, 0, 0);
     selectMode_ = false;
     scaleMode_ = false;
+    setMouseTracking(false);
+    curScene_->update();
 }
 
 void PdfView::mousePressEvent(QMouseEvent* e)
 {
     if(selectMode_) {
         startPos_ = e->pos();
+        selecting_ = true;
     }
     e->ignore();
     QGraphicsView::mousePressEvent(e);
@@ -163,6 +180,7 @@ void PdfView::mousePressEvent(QMouseEvent* e)
 void PdfView::mouseMoveEvent(QMouseEvent* e)
 {
     if(selectMode_) {
+        if (!selecting_) return;
         endPos_ = e->pos();
         auto sceneStartPos = mapToScene(startPos_);
         auto sceneEndPos = mapToScene(endPos_);
@@ -173,6 +191,9 @@ void PdfView::mouseMoveEvent(QMouseEvent* e)
         brush.setStyle(Qt::SolidPattern);
         brush.setColor(QColor(150, 150, 200, 100));
         curSelect_->setBrush(brush);
+        auto pen = QPen(QColor(150, 150, 200, 100));
+        curSelect_->setPen(pen);
+        curScene_->update();
     }
     e->ignore();
     QGraphicsView::mouseMoveEvent(e);
@@ -187,10 +208,15 @@ void PdfView::mouseReleaseEvent(QMouseEvent* e)
         auto spos = curSelect_->mapFromScene(sceneStartPos);
         auto epos = curSelect_->mapFromScene(sceneEndPos);
         curSelect_->setRect(QRectF(spos, epos));
-        auto selectArea = new QGraphicsRectItem();
+        auto select = new SelectRect();
+        connect(select, &SelectRect::babyPleaseKillMe, curScene_, &QGraphicsScene::removeItem);
+        auto selectArea = select->graphicsItem();
         selectArea->setRect(curSelect_->rect());
         selectArea->setBrush(curSelect_->brush());
+        selectArea->setPen(curSelect_->pen());
         curScene_->addItem(selectArea);
+        curSelect_->setRect(0, 0, 0, 0);
+        selecting_ = false;
     }
     e->ignore();
     QGraphicsView::mouseReleaseEvent(e);
@@ -212,14 +238,14 @@ void PdfView::wheelEvent(QWheelEvent *e)
         return;
     }
     if(e->angleDelta().y() >= 0) {
-        MoveUp(e->angleDelta().y() * 0.5);
+        moveUp(e->angleDelta().y() * 0.5);
     } else {
-        MoveDown(e->angleDelta().y() * -0.5);
+        moveDown(e->angleDelta().y() * -0.5);
     }
     if(e->angleDelta().x() >= 0) {
-        MoveLeft(e->angleDelta().x() * 0.5);
+        moveLeft(e->angleDelta().x() * 0.5);
     } else {
-        MoveRight((e->angleDelta().x() * -0.5));
+        moveRight((e->angleDelta().x() * -0.5));
     }
 }
 
@@ -228,19 +254,26 @@ void PdfView::keyPressEvent(QKeyEvent *e)
 
     e->ignore();
     if (e->key() == Qt::Key_J || e->key() == Qt::Key_Down) {
-        MoveDown(50);
+        moveDown(50);
     }
     if (e->key() == Qt::Key_K || e->key() == Qt::Key_Up) {
-        MoveUp(50);
+        moveUp(50);
     }
     if (e->key() == Qt::Key_H || e->key() == Qt::Key_Left) {
-        MoveLeft(50);
+        moveLeft(50);
     }
     if (e->key() == Qt::Key_L || e->key() == Qt::Key_Right) {
-        MoveRight(50);
+        moveRight(50);
     }
     if(e->key() == Qt::Key_Shift) {
-        enterSelectMode();
+        if (selectMode_) {
+            clearEditMode();
+        } else {
+            enterSelectMode();
+        }
+    }
+    if(e->key() == Qt::Key_Escape) {
+        clearEditMode();
     }
     if(e->key() == Qt::Key_Control) {
         enterScaleMode();
@@ -251,9 +284,7 @@ void PdfView::keyReleaseEvent(QKeyEvent *e)
 {
     e->ignore();
     QGraphicsView::keyReleaseEvent(e);
-    if((selectMode_ && e->key() == Qt::Key_Shift)
-            ||(scaleMode_ && e->key() == Qt::Key_Control))
-    {
+    if(scaleMode_ && e->key() == Qt::Key_Control) {
         clearEditMode();
     }
 }
@@ -276,7 +307,7 @@ void PdfView::focusOutEvent(QFocusEvent *e)
     clearEditMode();
 }
 
-void PdfView::MoveUp(int n)
+void PdfView::moveUp(int n)
 {
     if(n <= 0) return;
     auto vBar = verticalScrollBar();
@@ -288,7 +319,7 @@ void PdfView::MoveUp(int n)
     vBar->setValue(vBar->value() - n);
 }
 
-void PdfView::MoveDown(int n)
+void PdfView::moveDown(int n)
 {
     if(n <= 0) return;
     auto vBar = verticalScrollBar();
@@ -300,7 +331,7 @@ void PdfView::MoveDown(int n)
     vBar->setValue(vBar->value() + n);
 }
 
-void PdfView::MoveLeft(int n)
+void PdfView::moveLeft(int n)
 {
     if(n <= 0) return;
     auto hBar = horizontalScrollBar();
@@ -312,7 +343,7 @@ void PdfView::MoveLeft(int n)
     hBar->setValue(hBar->value() - n);
 }
 
-void PdfView::MoveRight(int n)
+void PdfView::moveRight(int n)
 {
     if(n <= 0) return;
     auto hBar = horizontalScrollBar();

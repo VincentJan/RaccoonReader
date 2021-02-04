@@ -1,3 +1,11 @@
+/*
+**  This file is part of Raccoon Reader.
+**
+** 	mainwindow.h: Declaration of MainWindow class.
+**
+**  Copyright 2021 Yang XiLong
+*/
+
 #ifndef PDFVIEW_H
 #define PDFVIEW_H
 
@@ -57,14 +65,15 @@ private:
 
     bool scaleMode_ = false;
     bool selectMode_ = false;
+    bool selecting_ = false;
 
     QPoint startPos_;
     QPoint endPos_;
 
-    void MoveUp(int n);
-    void MoveDown(int n);
-    void MoveLeft(int n);
-    void MoveRight(int n);
+    void moveUp(int n);
+    void moveDown(int n);
+    void moveLeft(int n);
+    void moveRight(int n);
 signals:
     void pageChanged(int n);
     void scaleChanged(double scale);

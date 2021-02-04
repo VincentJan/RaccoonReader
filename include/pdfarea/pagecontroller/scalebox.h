@@ -1,3 +1,11 @@
+/*
+**  This file is part of Raccoon Reader.
+**
+** 	mainwindow.h: Declaration of MainWindow class.
+**
+**  Copyright 2021 Yang XiLong
+*/
+
 #ifndef SCALEBOX_H
 #define SCALEBOX_H
 

@@ -1,4 +1,12 @@
-#include "scalebox.h"
+/*
+**  This file is part of Raccoon Reader.
+**
+** 	mainwindow.h: Declaration of MainWindow class.
+**
+**  Copyright 2021 Yang XiLong
+*/
+
+#include "include/pdfarea/pagecontroller/scalebox.h"
 
 #include <QStringList>
 #include <QRegExpValidator>

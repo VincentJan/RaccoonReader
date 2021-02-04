@@ -1,3 +1,13 @@
+/*
+**  This file is part of Raccoon Reader.
+**
+** 	pagespinbox.h: Declaration of PageSpinBox class which modifyed
+** 		from QSpinBox class. This class provide a better way to edit
+** 		numbers.
+**
+**  Copyright 2021 Yang XiLong
+*/
+
 #ifndef PAGESPINBOX_H
 #define PAGESPINBOX_H
 

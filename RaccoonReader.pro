@@ -11,23 +11,25 @@ LIBS   += -L/usr/lib -lpoppler-qt5
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    main.cpp \
-    mainwindow.cpp \
-    pagecontroller.cpp \
-    pageslider.cpp \
-    pagespinbox.cpp \
-    pdfview.cpp \
-    scalebox.cpp \
-    toc.cpp
+        src/main.cpp \
+        src/mainwindow.cpp \
+    src/pdfarea/pagecontroller/pagecontroller.cpp \
+    src/pdfarea/pagecontroller/pageslider.cpp \
+    src/pdfarea/pagecontroller/pagespinbox.cpp \
+    src/pdfarea/pagecontroller/scalebox.cpp \
+    src/pdfarea/pdfview/pdfview.cpp \
+    src/pdfarea/pdfview/selectrect.cpp \
+    src/sidebar/toc.cpp
 
 HEADERS += \
-    mainwindow.h \
-    pagecontroller.h \
-    pageslider.h \
-    pagespinbox.h \
-    pdfview.h \
-    scalebox.h \
-    toc.h
+        include/mainwindow.h \
+    include/pdfarea/pagecontroller/pagecontroller.h \
+    include/pdfarea/pagecontroller/pageslider.h \
+    include/pdfarea/pagecontroller/pagespinbox.h \
+    include/pdfarea/pagecontroller/scalebox.h \
+    include/pdfarea/pdfview/pdfview.h \
+    include/pdfarea/pdfview/selectrect.h \
+    include/sidebar/toc.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

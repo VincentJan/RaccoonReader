@@ -1,7 +1,8 @@
 <RCC>
     <qresource prefix="/images">
-        <file alias="icon.png">Resources/Icon.png</file>
-        <file alias="save.svg">Resources/document-save-symbolic.svg</file>
-        <file alias="open.svg">Resources/document-open-symbolic.svg</file>
+        <file alias="icon.png">res/Icon.png</file>
+        <file alias="delete.svg">res/edit-delete.svg</file>
+        <file alias="save.svg">res/document-save-symbolic.svg</file>
+        <file alias="open.svg">res/document-open-symbolic.svg</file>
     </qresource>
 </RCC>

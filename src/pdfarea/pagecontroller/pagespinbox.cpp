@@ -1,4 +1,12 @@
-#include "pagespinbox.h"
+/*
+**  This file is part of Raccoon Reader.
+**
+** 	mainwindow.h: Declaration of MainWindow class.
+**
+**  Copyright 2021 Yang XiLong
+*/
+
+#include "include/pdfarea/pagecontroller/pagespinbox.h"
 
 PageSpinBox::PageSpinBox(QWidget* parent) {
     setParent(parent);

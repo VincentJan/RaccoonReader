@@ -9,9 +9,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "pdfview.h"
-#include "pagecontroller.h"
-#include "toc.h"
+#include "include/pdfarea/pdfview/pdfview.h"
+#include "include/pdfarea/pagecontroller/pagecontroller.h"
+#include "include/sidebar/toc.h"
 
 #include <QMainWindow>
 #include <QSplitter>

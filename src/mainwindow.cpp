@@ -1,4 +1,12 @@
-#include "mainwindow.h"
+/*
+**  This file is part of Raccoon Reader.
+**
+** 	mainwindow.h: Declaration of MainWindow class.
+**
+**  Copyright 2021 Yang XiLong
+*/
+
+#include "include/mainwindow.h"
 
 #include <QGuiApplication>
 #include <QScreen>

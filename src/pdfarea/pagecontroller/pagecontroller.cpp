@@ -1,29 +1,48 @@
-#include "pagecontroller.h"
-#include <QDebug>
+/*
+**  This file is part of Raccoon Reader.
+**
+** 	pagecontroller.cpp: Definition of PageController class.
+**
+**  Copyright 2021 Yang XiLong
+*/
 
+#include "include/pdfarea/pagecontroller/pagecontroller.h"
+#include <QDebug>
+#include <QHBoxLayout>
+
+// Conturctor accept the size of parent widget use to make size of itself,
+// and a page count of current document
 PageController::PageController(const QSize& size, const int pageCount)
     : pageCount_(pageCount), lastPage_(0)
 {
-    setOrientation(Qt::Horizontal);
-    setFixedHeight(size.height() * 0.03);
+    setFixedHeight(size.height() * 0.035);
+
+    auto *layout = new QHBoxLayout(this);
+    setLayout(layout);
+    layout->setContentsMargins(10, 0, 10, 10);
 
     scaleBox_ = new ScaleBox(this);
     scaleBox_->setFixedHeight(size.height() * 0.03);
     scaleBox_->setFixedWidth(size.width() * 0.1);
+    layout->addWidget(scaleBox_);
+
     connect(scaleBox_, &ScaleBox::scaleChanged, this
             , [this](double s){emit scaleChanged(s);});
     connect(scaleBox_, &ScaleBox::textActivated, this
             , [this](){emit scaleSelected();});
 
+    // only slider not set to fixed width, that means only slider can fit
+    // width while the widget's size have change.
     slider_ = new PageSlider(this);
     slider_->setFixedHeight(size.height() * 0.03);
-    addWidget(slider_);
+    layout->addWidget(slider_);
 
     spinBox_ = new PageSpinBox(this);
     spinBox_->setFixedHeight(size.height() * 0.03);
     spinBox_->setFixedWidth(size.width() * 0.05);
-    addWidget(spinBox_);
+    layout->addWidget(spinBox_);
 
+    // binding values in spinbox and slider.
     connect(slider_, &PageSlider::valueChanged, spinBox_, &QSpinBox::setValue);
     connect(slider_, &PageSlider::SlideFinished, this, &PageController::emitChange);
     connect(spinBox_, &QSpinBox::editingFinished, this, &PageController::emitChange);
@@ -32,7 +51,7 @@ PageController::PageController(const QSize& size, const int pageCount)
     pageCountLabel_->setFixedWidth(size.width() * 0.05);
     pageCountLabel_->setFixedHeight(size.height() * 0.03);
     pageCountLabel_->setAlignment(Qt::AlignHCenter);
-    addWidget(pageCountLabel_);
+    layout->addWidget(pageCountLabel_);
 
     setPageCount(pageCount);
 }
@@ -59,7 +78,6 @@ void PageController::setFromDocument(Document *doc)
     setPageNum(1);
     setScale(1);
 }
-
 void PageController::setScale(double scale)
 {
     scaleBox_->setScale(scale);

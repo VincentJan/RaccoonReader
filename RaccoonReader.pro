@@ -17,7 +17,10 @@ SOURCES += \
     src/pdfarea/pagecontroller/pageslider.cpp \
     src/pdfarea/pagecontroller/pagespinbox.cpp \
     src/pdfarea/pagecontroller/scalebox.cpp \
+    src/pdfarea/pdfview/pdfmarkstate.cpp \
     src/pdfarea/pdfview/pdfview.cpp \
+    src/pdfarea/pdfview/pdfviewstate.cpp \
+    src/pdfarea/pdfview/pdfzoomstate.cpp \
     src/sidebar/toc.cpp
 
 HEADERS += \
@@ -26,8 +29,11 @@ HEADERS += \
     include/pdfarea/pagecontroller/pageslider.h \
     include/pdfarea/pagecontroller/pagespinbox.h \
     include/pdfarea/pagecontroller/scalebox.h \
+    include/pdfarea/pdfview/pdfmarkstate.h \
     include/pdfarea/pdfview/pdfstate.h \
-    include/pdfarea/pdfview/pdfview.h
+    include/pdfarea/pdfview/pdfview.h \
+    include/pdfarea/pdfview/pdfviewstate.h \
+    include/pdfarea/pdfview/pdfzoomstate.h \
     include/sidebar/toc.h
 
 # Default rules for deployment.

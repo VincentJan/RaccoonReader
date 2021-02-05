@@ -57,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, &MainWindow::documentChanged, pageController_, &PageController::setFromDocument);
     connect(pageController_, &PageController::pageChanged, pdfView_, &PdfView::setPageNum);
     connect(pdfView_, &PdfView::pageChanged, pageController_, &PageController::setPageNum);
-    connect(pageController_, &PageController::scaleChanged, pdfView_, &PdfView::setScale);
+    connect(pageController_, &PageController::scaleChanged, pdfView_, &PdfView::setZoomLevel);
     connect(pdfView_, &PdfView::scaleChanged, pageController_, &PageController::setScale);
     connect(pageController_, &PageController::scaleSelected, pdfView_, &PdfView::clearFitMode);
     pdfArea_->addWidget(pageController_);
@@ -123,7 +123,7 @@ void MainWindow::closeFile()
 void MainWindow::actualSize()
 {
     pdfView_->setFitMode(PdfView::None);
-    pdfView_->setScale(1);
+    pdfView_->setZoomLevel(1);
     pageController_->setScale(1);
 }
 

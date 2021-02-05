@@ -1,0 +1,89 @@
+@startuml pdfview
+
+class PdfView {
+    +PdfView(*parent)
+    +PdfView(&path, *parent)
+    +pageNum()
+    +pageCount()
+    +setPageNum()
+    +setDocument()
+    +setScale()
+    +setFitMode()
+    +clearFitMode()
+    #mousePressEvent()
+    #mouseMoveEvent()
+    #mouseReleaseEvent()
+    #wheelEvent()
+    #keyPressEvent()
+    #keyReleaseEvent()
+    #focusOutEvent()
+    #resizeEvent()
+    -state
+    -pageNum_
+    -doc_
+    -scale_
+    +pageChanged
+    +scaleChanged
+}
+
+abstract class PdfState {
+    +FitMode
+    -next_
+    -pdfView_
+    -fitMode_
+    +PdfState(*state)
+    +virtual ~PdfState()
+    +nextState()
+    +setFitMode()
+    +clearFitMode()
+    +virtual mousePressEvent()
+    +virtual mouseMoveEvent()
+    +virtual mouseReleaseEvent()
+    +virtual wheelEvent()
+    +virtual keyPressEvent()
+    +virtual keyReleaseEvent()
+    +virtual focusOutEvent()
+    +virtual resizeEvent()
+}
+
+PdfView -|> QGraphicsView
+PdfState -* PdfView
+PdfState *- PdfView
+
+PdfViewState -|> PdfState
+PdfEditState --|> PdfState
+PdfState <|-- PdfScaleState
+
+class PdfViewState {
+    +moveUp()
+    +moveDown()
+    +moveLeft()
+    +moveRight()
+    +wheelEvent()
+    +keyPressEvent()
+    +keyReleaseEvent()
+}
+
+class PdfEditState {
+    -select_
+    -sclecting_
+    -startPos_
+    -endPos_
+    +mousePressEvent()
+    +mouseMoveEvent()
+    +mouseReleaseEvent()
+    +wheelEvent()
+    +keyPressEvent()
+    +keyReleaseEvent()
+    +focusOutEvent()
+}
+
+class PdfScaleState {
+    +virtual wheelEvent()
+    +virtual keyPressEvent()
+    +virtual keyReleaseEvent()
+    +virtual focusOutEvent()
+    +virtual resizeEvent()
+}
+
+@enduml

@@ -19,6 +19,8 @@
 using Poppler::Document;
 using std::function;
 
+class PdfState;
+
 class PdfView : public QGraphicsView
 {
     Q_OBJECT
@@ -35,15 +37,13 @@ public:
     ~PdfView();
     int pageNum() const;
     int pageCount() const;
+    double zoomLevel() const;
     Document* document() const;
     void setPageNum(int n);
     void setDocument(Document* doc);
-    void setScale(double scale);
+    void setZoomLevel(double zoomLevel);
     void setFitMode(FitMode fitMode);
     void clearFitMode();
-    void enterSelectMode();
-    void enterScaleMode();
-    void clearEditMode();
 protected:
     void mousePressEvent(QMouseEvent *e) override;
     void mouseMoveEvent(QMouseEvent *e) override;
@@ -54,26 +54,13 @@ protected:
     void resizeEvent(QResizeEvent *e) override;
     void focusOutEvent(QFocusEvent *e) override;
 private:
+    PdfState *state_;
     int pageNum_ = 0;
-    double scale_ = 1;
-    bool painting_ = false;
+    double zoomLevel_ = 1;
     FitMode fitMode_;
-    QPoint startPot_;
     Document* doc_;
-    QGraphicsScene* curScene_;
-    QGraphicsRectItem *curSelect_;
 
-    bool scaleMode_ = false;
-    bool selectMode_ = false;
-    bool selecting_ = false;
-
-    QPoint startPos_;
-    QPoint endPos_;
-
-    void moveUp(int n);
-    void moveDown(int n);
-    void moveLeft(int n);
-    void moveRight(int n);
+    void changeState();
 signals:
     void pageChanged(int n);
     void scaleChanged(double scale);

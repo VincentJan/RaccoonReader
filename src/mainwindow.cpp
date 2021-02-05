@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, &MainWindow::documentChanged, pdfView_, &PdfView::setDocument);
 
     mainSplitter_ = new QSplitter(Qt::Horizontal, this);
+    mainSplitter_->setHandleWidth(0);
     setCentralWidget(mainSplitter_);
 
     sideBar_ = new QTabWidget(this);
@@ -49,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
     sideBar_->addTab(toc_, tr("Contents"));
 
     pdfArea_ = new QSplitter(Qt::Vertical, mainSplitter_);
+    pdfArea_->setHandleWidth(0);
     pdfArea_->addWidget(pdfView_);
 
     pageController_ = new PageController(this->size());
@@ -110,8 +112,6 @@ void MainWindow::openFile()
     closeFile();
     emit documentChanged(Document::load(fileName));
     sideBar_->setVisible(true);
-    mainSplitter_->setStretchFactor(0, 1);
-    mainSplitter_->setStretchFactor(1, 3);
 }
 
 void MainWindow::closeFile()

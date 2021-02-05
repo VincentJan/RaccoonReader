@@ -15,7 +15,7 @@
 PageController::PageController(const QSize& size, const int pageCount)
     : pageCount_(pageCount), lastPage_(0)
 {
-    setFixedHeight(size.height() * 0.035);
+    setFixedHeight(size.height() * 0.03);
 
     auto *layout = new QHBoxLayout(this);
     setLayout(layout);
@@ -48,9 +48,9 @@ PageController::PageController(const QSize& size, const int pageCount)
     connect(spinBox_, &QSpinBox::editingFinished, this, &PageController::emitChange);
 
     pageCountLabel_ = new QLabel(this);
-    pageCountLabel_->setFixedWidth(size.width() * 0.05);
+    pageCountLabel_->setMaximumWidth(size.width() * 0.05);
     pageCountLabel_->setFixedHeight(size.height() * 0.03);
-    pageCountLabel_->setAlignment(Qt::AlignHCenter);
+    pageCountLabel_->setAlignment(Qt::AlignCenter);
     layout->addWidget(pageCountLabel_);
 
     setPageCount(pageCount);

@@ -7,7 +7,6 @@
 */
 
 #include "include/pdfarea/pdfview/pdfview.h"
-#include "include/pdfarea/pdfview/selectrect.h"
 
 #include <QDebug>
 #include <QWheelEvent>
@@ -17,9 +16,6 @@
 #include <QScreen>
 #include <QRect>
 #include <QGraphicsRectItem>
-#include <QApplication>
-#include <QDialog>
-#include <QLabel>
 
 PdfView::PdfView(QWidget *parent)
     : QGraphicsView(parent), fitMode_(), doc_(), curScene_(new QGraphicsScene)
@@ -70,8 +66,9 @@ void PdfView::setPageNum(int n)
 void PdfView::setDocument(Document* doc)
 {
     doc_ = doc;
-    if(doc == nullptr) {
+    if(doc_ == nullptr) {
         curScene_->clear();
+        qDebug() << "PdfView OK";
         return;
     }
     doc_->setPaperColor(QColor(248,248,248));
@@ -202,21 +199,9 @@ void PdfView::mouseMoveEvent(QMouseEvent* e)
 void PdfView::mouseReleaseEvent(QMouseEvent* e)
 {
     if(selectMode_) {
-        endPos_ = e->pos();
-        auto sceneStartPos = mapToScene(startPos_);
-        auto sceneEndPos = mapToScene(endPos_);
-        auto spos = curSelect_->mapFromScene(sceneStartPos);
-        auto epos = curSelect_->mapFromScene(sceneEndPos);
-        curSelect_->setRect(QRectF(spos, epos));
-        auto select = new SelectRect();
-        connect(select, &SelectRect::babyPleaseKillMe, curScene_, &QGraphicsScene::removeItem);
-        auto selectArea = select->graphicsItem();
-        selectArea->setRect(curSelect_->rect());
-        selectArea->setBrush(curSelect_->brush());
-        selectArea->setPen(curSelect_->pen());
-        curScene_->addItem(selectArea);
         curSelect_->setRect(0, 0, 0, 0);
         selecting_ = false;
+        curScene_->update();
     }
     e->ignore();
     QGraphicsView::mouseReleaseEvent(e);

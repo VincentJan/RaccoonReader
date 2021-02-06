@@ -17,7 +17,7 @@ ScaleBox::ScaleBox(QWidget *parent)
 {
     QStringList items;
     items << "25%" << "50%" << "75%" << "100%" << "125%" << "150%"
-        << "175%" << "200%" << "300%" << "400%" << "800%";
+        << "175%" << "200%" << "300%" << "400%";
     addItems(items);
     setCurrentIndex(3);
     setEditable(true);

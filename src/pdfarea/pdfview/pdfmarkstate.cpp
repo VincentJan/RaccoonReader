@@ -5,6 +5,10 @@
 #include <QGraphicsRectItem>
 #include <QScrollBar>
 
+#include <poppler/qt5/poppler-qt5.h>
+
+using Poppler::HighlightAnnotation;
+
 PdfMarkState::PdfMarkState(PdfView *pdfView)
     : PdfState(pdfView)
 {
@@ -76,6 +80,11 @@ void PdfMarkState::mouseMoveEvent(QMouseEvent *e)
 
 void PdfMarkState::mouseReleaseEvent(QMouseEvent *)
 {
+    auto page = pdfView_->document()->page(pdfView_->pageNum() - 1);
+    auto anno = new HighlightAnnotation();
+    anno->setBoundary(QRectF(0.1,0.1,0.2,0.2));
+    anno->setContents("Hello World");
+    page->addAnnotation(anno);
     selectArea->setRect(0, 0, 0, 0);
 }
 

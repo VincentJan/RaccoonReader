@@ -13,6 +13,9 @@ public:
     virtual void keyReleaseEvent   (QKeyEvent    *);
     virtual void wheelEvent        (QWheelEvent  *);
     virtual void focusOutEvent     (QFocusEvent  *);
+private:
+    void zoomIn();
+    void zoomOut();
 };
 
 #endif // PDFZOOMSTATE_H

@@ -17,6 +17,7 @@ SOURCES += \
     src/pdfarea/pagecontroller/pageslider.cpp \
     src/pdfarea/pagecontroller/pagespinbox.cpp \
     src/pdfarea/pagecontroller/scalebox.cpp \
+    src/pdfarea/pdfview/highlightarea.cpp \
     src/pdfarea/pdfview/pdfmarkstate.cpp \
     src/pdfarea/pdfview/pdfview.cpp \
     src/pdfarea/pdfview/pdfviewstate.cpp \
@@ -29,6 +30,8 @@ HEADERS += \
     include/pdfarea/pagecontroller/pageslider.h \
     include/pdfarea/pagecontroller/pagespinbox.h \
     include/pdfarea/pagecontroller/scalebox.h \
+    include/pdfarea/pdfview/highlightarea.h \
+    include/pdfarea/pdfview/marktable.h \
     include/pdfarea/pdfview/pdfmarkstate.h \
     include/pdfarea/pdfview/pdfstate.h \
     include/pdfarea/pdfview/pdfview.h \

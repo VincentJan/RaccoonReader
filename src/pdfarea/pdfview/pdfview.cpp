@@ -18,6 +18,8 @@
 #include <QRect>
 #include <QGraphicsRectItem>
 
+using Poppler::TextAnnotation;
+
 PdfView::PdfView(QWidget *parent)
     : QGraphicsView(parent), fitMode_(), doc_()
 {
@@ -96,6 +98,7 @@ double PdfView::zoomLevel() const
 
 void PdfView::setZoomLevel(double zoomLevel)
 {
+    auto pos = mapToScene(viewport()->rect().center()) / zoomLevel_;
     auto originLevel = zoomLevel_;
     if(doc_ == nullptr) return;
     double height = size().height() - 2;
@@ -130,6 +133,7 @@ void PdfView::setZoomLevel(double zoomLevel)
         emit scaleChanged(zoomLevel_);
     }
     setPageNum(pageNum_);
+    centerOn(pos * zoomLevel_);
 }
 
 void PdfView::setFitMode(FitMode fitMode)

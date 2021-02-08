@@ -1,5 +1,6 @@
-#include "include/pdfarea/pdfview/pdfmarkstate.h"
-#include "include/pdfarea/pdfview/pdfviewstate.h"
+#include "pdfarea/pdfview/pdfmarkstate.h"
+#include "pdfarea/pdfview/pdfviewstate.h"
+#include "pdfarea/pdfview/highlightarea.h"
 
 #include <QApplication>
 #include <QGraphicsRectItem>
@@ -75,17 +76,26 @@ void PdfMarkState::mouseMoveEvent(QMouseEvent *e)
         sPot.setY(ePot.y());
         ePot.setY(tmp);
     }
+    sPot.setX((sPot.x() < 0) ? 0 : sPot.x());
+    sPot.setY((sPot.y() < 0) ? 0 : sPot.y());
+    auto maxX = pdfView_->sceneRect().x() + pdfView_->sceneRect().width();
+    auto maxY = pdfView_->sceneRect().y() + pdfView_->sceneRect().height();
+    ePot.setX((ePot.x() > maxX) ? maxX : ePot.x());
+    ePot.setY((ePot.y() > maxY) ? maxY : ePot.y());
     selectArea->setRect(QRectF(sPot, ePot));
 }
 
 void PdfMarkState::mouseReleaseEvent(QMouseEvent *)
 {
-    auto page = pdfView_->document()->page(pdfView_->pageNum() - 1);
-    auto anno = new HighlightAnnotation();
-    anno->setBoundary(QRectF(0.1,0.1,0.2,0.2));
-    anno->setContents("Hello World");
-    page->addAnnotation(anno);
+    auto rect = selectArea->rect();
     selectArea->setRect(0, 0, 0, 0);
+    auto img = new QImage(rect.width(), rect.height()
+                          , QImage::Format_RGBA64);
+    auto painter = new QPainter(img);
+    pdfView_->scene()->render(painter, QRectF(), rect);
+    auto mark = new HighlightArea(rect);
+    mark->fixBackground(*img);
+    pdfView_->scene()->addItem(mark);
 }
 
 void PdfMarkState::focusOutEvent(QFocusEvent *)

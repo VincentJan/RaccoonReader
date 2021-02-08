@@ -6,7 +6,7 @@
 **  Copyright 2021 Yang XiLong
 */
 
-#include "include/pdfarea/pagecontroller/pageslider.h"
+#include "pdfarea/pagecontroller/pageslider.h"
 #include <QMouseEvent>
 
 PageSlider::PageSlider(QWidget* parent) : step_(1) {

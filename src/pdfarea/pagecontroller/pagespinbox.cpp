@@ -6,7 +6,7 @@
 **  Copyright 2021 Yang XiLong
 */
 
-#include "include/pdfarea/pagecontroller/pagespinbox.h"
+#include "pdfarea/pagecontroller/pagespinbox.h"
 
 PageSpinBox::PageSpinBox(QWidget* parent) {
     setParent(parent);

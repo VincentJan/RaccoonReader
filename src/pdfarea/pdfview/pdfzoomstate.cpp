@@ -1,5 +1,5 @@
-#include "include/pdfarea/pdfview/pdfzoomstate.h"
-#include "include/pdfarea/pdfview/pdfviewstate.h"
+#include "pdfarea/pdfview/pdfzoomstate.h"
+#include "pdfarea/pdfview/pdfviewstate.h"
 
 #include <QApplication>
 #include <QScrollBar>
@@ -60,15 +60,15 @@ void PdfScaleState::focusOutEvent(QFocusEvent *)
 void PdfScaleState::zoomIn()
 {
     auto zoomLevel = pdfView_->zoomLevel();
-    if (pdfView_->zoomLevel() >= 2) return;
+    zoomLevel = (zoomLevel + 0.25 >= 2) ? 2 : zoomLevel + 0.25;
     pdfView_->clearFitMode();
-    pdfView_->setZoomLevel(zoomLevel + 0.25);
+    pdfView_->setZoomLevel(zoomLevel);
 }
 
 void PdfScaleState::zoomOut()
 {
     auto zoomLevel = pdfView_->zoomLevel();
-    if (pdfView_->zoomLevel() <= 0.25) return;
+    zoomLevel = (zoomLevel - 0.25 <= 0.25) ? 0.25 : zoomLevel - 0.25;
     pdfView_->clearFitMode();
-    pdfView_->setZoomLevel(zoomLevel - 0.25);
+    pdfView_->setZoomLevel(zoomLevel);
 }

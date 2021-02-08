@@ -6,7 +6,7 @@
 **  Copyright 2021 Yang XiLong
 */
 
-#include "include/mainwindow.h"
+#include "mainwindow.h"
 
 #include <QGuiApplication>
 #include <QScreen>
@@ -60,6 +60,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(pageController_, &PageController::scaleChanged, pdfView_, &PdfView::setZoomLevel);
     connect(pdfView_, &PdfView::scaleChanged, pageController_, &PageController::setScale);
     connect(pageController_, &PageController::scaleSelected, pdfView_, &PdfView::clearFitMode);
+    connect(pageController_, &PageController::fitModeChanged, pdfView_, &PdfView::setFitMode);
+    connect(pdfView_, &PdfView::fitModeChanged, pageController_, &PageController::setFitMode);
     pdfArea_->addWidget(pageController_);
 
     mainSplitter_->addWidget(pdfArea_);
@@ -72,11 +74,13 @@ void MainWindow::generateMenuBar()
 
     auto openFile = new QAction(tr("Open File"), fileMenu);
     openFile->setShortcut(QKeySequence::Open);
+    openFile->setIcon(QIcon(":/images/open.svg"));
     connect(openFile, &QAction::triggered, this, &MainWindow::openFile);
     fileMenu->addAction(openFile);
 
     auto closeFile = new QAction(tr("Close File"), fileMenu);
     closeFile->setShortcut(QKeySequence::Close);
+    closeFile->setIcon(QIcon(":/images/close.svg"));
     connect(closeFile, &QAction::triggered, this, &MainWindow::closeFile);
     fileMenu->addAction(closeFile);
 
@@ -84,18 +88,25 @@ void MainWindow::generateMenuBar()
     menuBar()->addMenu(viewMenu);
 
     auto actualSize = new QAction(tr("Actual Size"), viewMenu);
+    actualSize->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_0));
     connect(actualSize, &QAction::triggered, this, &MainWindow::actualSize);
     viewMenu->addAction(actualSize);
 
     auto fitWidth = new QAction(tr("Fit Width"), viewMenu);
+    fitWidth->setIcon(QIcon(":/images/fitWidth.svg"));
+    fitWidth->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_7));
     connect(fitWidth, &QAction::triggered, this, &MainWindow::fitWidth);
     viewMenu->addAction(fitWidth);
 
     auto fitHeight = new QAction(tr("Fit Height"), viewMenu);
+    fitHeight->setIcon(QIcon(":/images/fitHeight.svg"));
+    fitHeight->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_8));
     connect(fitHeight, &QAction::triggered, this, &MainWindow::fitHeight);
     viewMenu->addAction(fitHeight);
 
     auto fitPage = new QAction(tr("Fit Page"), viewMenu);
+    fitPage->setIcon(QIcon(":/images/fitPage.svg"));
+    fitPage->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_9));
     connect(fitPage, &QAction::triggered, this, &MainWindow::fitPage);
     viewMenu->addAction(fitPage);
 
@@ -129,17 +140,29 @@ void MainWindow::actualSize()
 
 void MainWindow::fitWidth()
 {
-    pdfView_->setFitMode(PdfView::FitWidth);
+    if(pdfView_->fitMode() == PdfView::FitWidth) {
+        pdfView_->setFitMode(PdfView::None);
+    } else {
+        pdfView_->setFitMode(PdfView::FitWidth);
+    }
 }
 
 void MainWindow::fitHeight()
 {
-    pdfView_->setFitMode(PdfView::FitHeight);
+    if(pdfView_->fitMode() == PdfView::FitHeight) {
+        pdfView_->setFitMode(PdfView::None);
+    } else {
+        pdfView_->setFitMode(PdfView::FitHeight);
+    }
 }
 
 void MainWindow::fitPage()
 {
-    pdfView_->setFitMode(PdfView::FitPage);
+    if(pdfView_->fitMode() == PdfView::FitPage) {
+        pdfView_->setFitMode(PdfView::None);
+    } else {
+        pdfView_->setFitMode(PdfView::FitPage);
+    }
 }
 
 void MainWindow::contentSelected(QTreeWidgetItem* item, int)

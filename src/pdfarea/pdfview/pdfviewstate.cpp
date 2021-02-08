@@ -1,6 +1,6 @@
-#include "include/pdfarea/pdfview/pdfviewstate.h"
-#include "include/pdfarea/pdfview/pdfzoomstate.h"
-#include "include/pdfarea/pdfview/pdfmarkstate.h"
+#include "pdfarea/pdfview/pdfviewstate.h"
+#include "pdfarea/pdfview/pdfzoomstate.h"
+#include "pdfarea/pdfview/pdfmarkstate.h"
 
 #include <QScrollBar>
 

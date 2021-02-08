@@ -6,10 +6,10 @@
 **  Copyright 2021 Yang XiLong
 */
 
-#include "include/sidebar/toc.h"
+#include "sidebar/toc.h"
 #include <QTreeWidgetItem>
-#include <QDebug>
 #include <QHeaderView>
+#include <QKeyEvent>
 
 namespace  {
     QString extractPageNum(const QString& str) {
@@ -58,6 +58,29 @@ void Toc::highlightItem(int n) {
         ++it;
     }
     setCurrentItem(*it);
+}
+
+void Toc::keyPressEvent(QKeyEvent *e)
+{
+    auto key = e->key();
+    QTreeWidgetItemIterator it(this);
+    while (*it) {
+        if((*it) == currentItem()) {
+            break;
+        }
+        ++it;
+    }
+    if(key == Qt::Key_J) {
+        ++it;
+        if(*it == nullptr) return;
+        setCurrentItem(*it);
+    } else if(key == Qt::Key_K) {
+        --it;
+        if(*it == nullptr) return;
+        setCurrentItem(*it);
+    }
+    e->ignore();
+    QTreeWidget::keyPressEvent(e);
 }
 
 void Toc::generateSubItem(QTreeWidgetItem* parent, const QVector<OutlineItem>& outlines) {

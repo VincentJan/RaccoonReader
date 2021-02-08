@@ -27,6 +27,8 @@ public:
     ~Toc() = default;
     void setDocument(Document* doc);
     void highlightItem(int n);
+protected:
+    void keyPressEvent(QKeyEvent *e) override;
 private:
     void generateSubItem(QTreeWidgetItem* parent, const QVector<OutlineItem>& outlines);
     QVector<OutlineItem> outlineItem_;

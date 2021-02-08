@@ -42,6 +42,7 @@ public:
     void setPageNum(int n);
     void setDocument(Document* doc);
     void setZoomLevel(double zoomLevel);
+    FitMode fitMode();
     void setFitMode(FitMode fitMode);
     void clearFitMode();
 protected:
@@ -64,6 +65,7 @@ private:
 signals:
     void pageChanged(int n);
     void scaleChanged(double scale);
+    void fitModeChanged(FitMode fitmode);
 };
 
 #endif // PDFVIEW_H

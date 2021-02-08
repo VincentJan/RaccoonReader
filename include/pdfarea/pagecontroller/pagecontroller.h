@@ -23,9 +23,13 @@
 #include "pageslider.h"
 #include "pagespinbox.h"
 #include "scalebox.h"
+#include "QPushButton"
+
+#include "pdfarea/pdfview/pdfview.h"
 
 #include <QLabel>
 #include <QSize>
+#include <QMap>
 
 #include <poppler/qt5/poppler-qt5.h>
 
@@ -43,19 +47,24 @@ public:
     void setPageNum(int n);
     void setFromDocument(Document *doc);
     void setScale(double scale);
+    void setFitMode(PdfView::FitMode fitMode);
 private:
     ScaleBox* scaleBox_;
+    QMap<PdfView::FitMode, QPushButton*> fitButtons_;
     PageSlider* slider_;
     PageSpinBox* spinBox_;
     QLabel* pageCountLabel_;
     int pageCount_;
     int lastPage_;
+    PdfView::FitMode fitMode_;
 
     void emitChange();
+    void initFitButtons();
 signals:
     void pageChanged(int pageNum);
     void scaleChanged(double scale);
     void scaleSelected();
+    void fitModeChanged(PdfView::FitMode);
 };
 
 #endif // PAGECONTROLLER_H

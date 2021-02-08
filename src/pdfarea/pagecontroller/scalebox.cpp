@@ -6,7 +6,7 @@
 **  Copyright 2021 Yang XiLong
 */
 
-#include "include/pdfarea/pagecontroller/scalebox.h"
+#include "pdfarea/pagecontroller/scalebox.h"
 
 #include <QStringList>
 #include <QRegExpValidator>

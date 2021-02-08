@@ -6,30 +6,33 @@
 **  Copyright 2021 Yang XiLong
 */
 
-#include "include/pdfarea/pagecontroller/pagecontroller.h"
+#include "pdfarea/pagecontroller/pagecontroller.h"
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QPushButton>
 
 // Conturctor accept the size of parent widget use to make size of itself,
 // and a page count of current document
 PageController::PageController(const QSize& size, const int pageCount)
-    : pageCount_(pageCount), lastPage_(0)
+    : pageCount_(pageCount), lastPage_(0), fitMode_(PdfView::None)
 {
     setFixedHeight(size.height() * 0.03);
 
-    auto *layout = new QHBoxLayout(this);
+    auto layout = new QHBoxLayout(this);
     setLayout(layout);
     layout->setContentsMargins(10, 0, 10, 10);
 
     scaleBox_ = new ScaleBox(this);
     scaleBox_->setFixedHeight(size.height() * 0.03);
-    scaleBox_->setFixedWidth(size.width() * 0.1);
+    scaleBox_->setMaximumWidth(size.width() * 0.08);
     layout->addWidget(scaleBox_);
 
     connect(scaleBox_, &ScaleBox::scaleChanged, this
             , [this](double s){emit scaleChanged(s);});
     connect(scaleBox_, &ScaleBox::textActivated, this
             , [this](){emit scaleSelected();});
+
+    initFitButtons();
 
     // only slider not set to fixed width, that means only slider can fit
     // width while the widget's size have change.
@@ -77,6 +80,7 @@ void PageController::setFromDocument(Document *doc)
     setPageCount(pageCount);
     setPageNum(1);
     setScale(1);
+    setFitMode(PdfView::None);
 }
 void PageController::setScale(double scale)
 {
@@ -92,4 +96,36 @@ void PageController::emitChange()
     lastPage_ = n;
     slider_->setValue(n);
     emit pageChanged(n);
+}
+
+void PageController::initFitButtons()
+{
+    fitButtons_[PdfView::FitWidth] = new QPushButton(QIcon(":/images/fitWidth.svg"),"", this);
+    fitButtons_[PdfView::FitWidth]->setToolTip("Fit Width");
+    fitButtons_[PdfView::FitHeight] = new QPushButton(QIcon(":/images/fitHeight.svg"),"", this);
+    fitButtons_[PdfView::FitHeight]->setToolTip("Fit Height");
+    fitButtons_[PdfView::FitPage] = new QPushButton(QIcon(":/images/fitPage.svg"), "", this);
+    fitButtons_[PdfView::FitPage]->setToolTip("Fit Page");
+    for(auto i = fitButtons_.begin(); i != fitButtons_.end(); ++i) {
+        auto button = *i;
+        button->setFixedHeight(size().height());
+        button->setFixedWidth(size().height());
+        button->setCheckable(true);
+        layout()->addWidget(button);
+        auto key = i.key();
+        connect(button, &QPushButton::toggled, this, [this, key](bool checked) {
+            if(checked) {
+                emit fitModeChanged(key);
+            } else if(fitMode_ == key) {
+                emit fitModeChanged(PdfView::None);
+            }
+        });
+    }
+}
+
+void PageController::setFitMode(PdfView::FitMode fitMode)
+{
+    for (auto i = fitButtons_.begin(); i != fitButtons_.end(); ++i) {
+        (*i)->setChecked(i.key() == fitMode);
+    }
 }

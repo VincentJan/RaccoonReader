@@ -6,8 +6,8 @@
 **  Copyright 2021 Yang XiLong
 */
 
-#include "include/pdfarea/pdfview/pdfview.h"
-#include "include/pdfarea/pdfview/pdfviewstate.h"
+#include "pdfarea/pdfview/pdfview.h"
+#include "pdfarea/pdfview/pdfviewstate.h"
 
 #include <QDebug>
 #include <QWheelEvent>
@@ -25,13 +25,13 @@ PdfView::PdfView(QWidget *parent)
 {
     state_ = new PdfViewState(this);
     setScene(new QGraphicsScene);
+    viewport()->setStyleSheet("background-color:grey");
 }
 
 PdfView::PdfView(const QString &path, QWidget *parent)
     : PdfView(parent)
 {
     doc_ = Document::load(path);
-    doc_->setPaperColor(QColor(248,248,248));
     doc_->setRenderHint(Poppler::Document::TextAntialiasing);
     setPageNum(1);
 }
@@ -61,6 +61,8 @@ void PdfView::setPageNum(int n)
     scene()->clear();
     scene()->addPixmap(QPixmap::fromImage(img));
     scene()->setSceneRect(0, 0, img.width(), img.height());
+    verticalScrollBar()->setValue(0);
+    horizontalScrollBar()->setValue(0);
 }
 
 void PdfView::setDocument(Document* doc)
@@ -98,9 +100,9 @@ double PdfView::zoomLevel() const
 
 void PdfView::setZoomLevel(double zoomLevel)
 {
+    if(doc_ == nullptr) return;
     auto pos = mapToScene(viewport()->rect().center()) / zoomLevel_;
     auto originLevel = zoomLevel_;
-    if(doc_ == nullptr) return;
     double height = size().height() - 2;
     double width = size().width() - 2;
     double pageWidth = scene()->sceneRect().width();
@@ -136,9 +138,16 @@ void PdfView::setZoomLevel(double zoomLevel)
     centerOn(pos * zoomLevel_);
 }
 
+PdfView::FitMode PdfView::fitMode()
+{
+    return fitMode_;
+}
+
 void PdfView::setFitMode(FitMode fitMode)
 {
+    if(fitMode == fitMode_) return;
     fitMode_ = fitMode;
+    emit fitModeChanged(fitMode_);
     setZoomLevel(zoomLevel_);
 }
 

@@ -2,7 +2,10 @@
     <qresource prefix="/images">
         <file alias="icon.png">res/Icon.png</file>
         <file alias="delete.svg">res/edit-delete.svg</file>
-        <file alias="save.svg">res/document-save-symbolic.svg</file>
-        <file alias="open.svg">res/document-open-symbolic.svg</file>
+        <file alias="fitWidth.svg">res/zoom-fit-width.svg</file>
+        <file alias="fitHeight.svg">res/zoom-fit-height.svg</file>
+        <file alias="fitPage.svg">res/zoom-fit-best.svg</file>
+        <file alias="open.svg">res/document-open.svg</file>
+        <file alias="close.svg">res/document-close.svg</file>
     </qresource>
 </RCC>
